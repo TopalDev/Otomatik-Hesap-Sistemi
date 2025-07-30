@@ -1,6 +1,6 @@
 # 🎮 Otomatik Hesap Sistemi
 
-Forum veya pazaryeri üzerinden satış yapılan oyun hesaplarını, alıcıya özel oluşturulan 6 haneli kod ile erişilebilir kılan **modern ve güvenli** web uygulaması.
+Forum veya pazaryeri üzerinden satış yapılan oyun hesaplarını, alıcıya özel oluşturulan key ile erişilebilir kılan **modern ve güvenli** web uygulaması.
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)
