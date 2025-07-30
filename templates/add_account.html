@@ -1,0 +1,702 @@
+{% extends "base.html" %}
+
+{% block title %}Hesap Ekle - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0" style="color: white;">
+                        <i class="fas fa-plus me-2"></i>Yeni Hesap Ekle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="platform" class="form-label" style="color: white;">
+                                        <i class="fas fa-desktop me-1"></i>Platform
+                                    </label>
+                                    <select class="form-control platform-select" id="platform" name="platform" required onchange="updateGameList()">
+                                        <option value="">Platform seçin...</option>
+                                        <option value="steam">Steam</option>
+                                        <option value="xbox">Xbox</option>
+                                        <option value="playstation">PlayStation</option>
+                                    </select>
+                                    <div class="form-text" style="color: white;">
+                                        Hesabın platformunu seçin
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="game" class="form-label" style="color: white;">
+                                        <i class="fas fa-gamepad me-1"></i>Oyun
+                                    </label>
+                                    <select class="form-control game-select" id="game" name="game" required>
+                                        <option value="">Önce platform seçin...</option>
+                                    </select>
+                                    <div class="form-text" style="color: white;">
+                                        Hesabın oyununu seçin
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label" style="color: white;">
+                                        <i class="fas fa-user me-1"></i>Kullanıcı Adı
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="username" 
+                                           name="username" 
+                                           required 
+                                           placeholder="kullanici_adi">
+                                    <div class="form-text" style="color: white;">
+                                        Hesabın kullanıcı adı
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label" style="color: white;">
+                                        <i class="fas fa-lock me-1"></i>Şifre
+                                    </label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password" 
+                                           required 
+                                           placeholder="********">
+                                    <div class="form-text" style="color: white;">
+                                        Hesabın şifresi
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="description" class="form-label" style="color: white;">
+                                        <i class="fas fa-info-circle me-1"></i>Açıklama
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="description" 
+                                           name="description" 
+                                           placeholder="Hesap açıklaması (opsiyonel)">
+                                    <div class="form-text" style="color: white;">
+                                        Hesap hakkında ek bilgi
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Steam Guard Kodu Alanı -->
+                        <div class="row" id="steamGuardRow" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="steam_guard_code" class="form-label" style="color: white;">
+                                        <i class="fas fa-shield-alt me-1"></i>Steam Guard Kodu
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="steam_guard_code" 
+                                           name="steam_guard_code" 
+                                           maxlength="10"
+                                           placeholder="A1B2C3D4E5">
+                                    <div class="form-text" style="color: white;">
+                                        Steam Guard doğrulama kodu (opsiyonel)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="backup_codes" class="form-label" style="color: white;">
+                                        <i class="fas fa-key me-1"></i>Backup Kodları
+                                    </label>
+                                    <textarea class="form-control" 
+                                              id="backup_codes" 
+                                              name="backup_codes" 
+                                              rows="4"
+                                              placeholder="1234567&#10;2345678&#10;3456789&#10;... (30 adet 7 haneli kod)"></textarea>
+                                    <div class="form-text" style="color: white;">
+                                        Steam Guard backup kodları (her satır bir kod, 30 adet)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong style="color: black;">Bilgi:</strong> <span style="color: black;">Şifreler veritabanında güvenli şekilde saklanır ve sadece kod kullanıldığında görüntülenir.</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-success me-2" onclick="showBulkAddModal()">
+                                    <i class="fas fa-upload me-2"></i>Toplu Hesap Ekle
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Hesabı Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: white;">
+                        <i class="fas fa-lightbulb me-2"></i>İpuçları
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Platform ve oyun seçimini doğru yapın
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kullanıcı adı ve şifre doğru olduğundan emin olun
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Hesap bilgilerini güvenli bir şekilde saklayın
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Her hesap için benzersiz bir kod oluşturun
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toplu Hesap Ekleme Modal -->
+<div class="modal fade" id="bulkAddModal" tabindex="-1" aria-labelledby="bulkAddModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background: #1a1a1a; border: 2px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 2px solid var(--border-color);">
+                <h5 class="modal-title" id="bulkAddModalLabel" style="color: white;">
+                    <i class="fas fa-upload me-2"></i>Toplu Hesap Ekleme
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" style="color: black;">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Bilgi:</strong> Seçili oyun için toplu hesap ekleyebilirsiniz. Her satır bir hesap olmalıdır.
+                </div>
+                
+                <div class="mb-3">
+                    <label for="bulkPlatform" class="form-label" style="color: white;">
+                        <i class="fas fa-gamepad me-1"></i>Platform
+                    </label>
+                    <select class="form-control platform-select" id="bulkPlatform">
+                        <option value="">Platform seçin...</option>
+                        <option value="steam">Steam</option>
+                        <option value="xbox">Xbox</option>
+                        <option value="playstation">PlayStation</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="bulkGame" class="form-label" style="color: white;">
+                        <i class="fas fa-gamepad me-1"></i>Oyun
+                    </label>
+                    <select class="form-control game-select" id="bulkGame">
+                        <option value="">Oyun seçin...</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="bulkAccounts" class="form-label" style="color: white;">
+                        <i class="fas fa-users me-1"></i>Hesap Listesi
+                    </label>
+                    <textarea class="form-control" 
+                              id="bulkAccounts" 
+                              rows="10" 
+                              placeholder="Her satır bir hesap olmalıdır. Format: kullanıcı_adı:şifre:açıklama (açıklama opsiyonel)
+Örnek:
+user1:password123:Test hesabı
+user2:password456
+user3:password789:Premium hesap"
+                              style="background-color: #1a1a1a; color: white; border: 2px solid var(--border-color);"></textarea>
+                    <div class="form-text" style="color: white;">
+                        Format: kullanıcı_adı:şifre:açıklama (açıklama opsiyonel)
+                    </div>
+                </div>
+                
+                <!-- Steam Guard Backup Kodları Alanı -->
+                <div class="mb-3" id="bulkSteamGuardRow" style="display: none;">
+                    <label for="bulkBackupCodes" class="form-label" style="color: white;">
+                        <i class="fas fa-key me-1"></i>Steam Guard Backup Kodları
+                    </label>
+                    <textarea class="form-control" 
+                              id="bulkBackupCodes" 
+                              rows="4" 
+                              placeholder="30 adet 7 haneli backup kodu (her satır bir kod)
+Örnek:
+1234567
+2345678
+3456789
+... (30 adet kod)"
+                              style="background-color: #1a1a1a; color: white; border: 2px solid var(--border-color);"></textarea>
+                    <div class="form-text" style="color: white;">
+                        Steam Guard backup kodları (her hesap için farklı kodlar kullanılacak)
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning" style="color: black;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Uyarı:</strong> Bu işlem geri alınamaz. Her hesap için otomatik kod oluşturulacaktır.
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 2px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>İptal
+                </button>
+                <button type="button" class="btn btn-success" onclick="previewBulkAccounts()">
+                    <i class="fas fa-eye me-2"></i>Önizleme
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitBulkAccounts()" id="submitBulkBtn" disabled>
+                    <i class="fas fa-save me-2"></i>Hesapları Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Önizleme Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content" style="background: #1a1a1a; border: 2px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 2px solid var(--border-color);">
+                <h5 class="modal-title" id="previewModalLabel" style="color: white;">
+                    <i class="fas fa-eye me-2"></i>Hesap Önizleme
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent" style="color: white;">
+                    <!-- Önizleme içeriği buraya gelecek -->
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 2px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>İptal
+                </button>
+                <button type="button" class="btn btn-primary" onclick="confirmBulkAccounts()">
+                    <i class="fas fa-check me-2"></i>Onayla ve Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Oyun listesi verileri (varsayılan)
+let gameData = {
+    steam: [],
+    xbox: [],
+    playstation: []
+};
+
+// Backend'den oyunları çek
+async function loadGamesFromServer() {
+    try {
+        const response = await fetch('{{ url_for("get_games_by_platform") }}');
+        const data = await response.json();
+        
+        if (data.success) {
+            gameData = data.games;
+            console.log('Oyunlar yüklendi:', gameData);
+        } else {
+            console.error('Oyunlar yüklenemedi:', data.error);
+        }
+    } catch (error) {
+        console.error('Oyunlar yüklenirken hata:', error);
+    }
+}
+
+function updateGameList() {
+    const platformSelect = document.getElementById('platform');
+    const gameSelect = document.getElementById('game');
+    const steamGuardRow = document.getElementById('steamGuardRow');
+    const selectedPlatform = platformSelect.value;
+    
+    // Steam Guard alanını göster/gizle
+    if (selectedPlatform === 'steam') {
+        steamGuardRow.style.display = 'block';
+    } else {
+        steamGuardRow.style.display = 'none';
+        document.getElementById('steam_guard_code').value = '';
+    }
+    
+    // Oyun listesini temizle
+    if (selectedPlatform === 'xbox' || selectedPlatform === 'playstation') {
+        gameSelect.innerHTML = '<option value="">Oyun seçin (Opsiyonel - Genel hesap için boş bırakın)</option>';
+    } else {
+        gameSelect.innerHTML = '<option value="">Oyun seçin...</option>';
+    }
+    
+    if (selectedPlatform && gameData[selectedPlatform]) {
+        gameData[selectedPlatform].forEach(game => {
+            const option = document.createElement('option');
+            option.value = game;
+            option.textContent = game;
+            gameSelect.appendChild(option);
+        });
+    }
+}
+
+// Modal için oyun listesi güncelleme
+function updateBulkGameList() {
+    const bulkPlatform = document.getElementById('bulkPlatform');
+    const bulkGame = document.getElementById('bulkGame');
+    const bulkSteamGuardRow = document.getElementById('bulkSteamGuardRow');
+    const selectedPlatform = bulkPlatform.value;
+    
+    // Steam Guard alanını göster/gizle
+    if (selectedPlatform === 'steam') {
+        bulkSteamGuardRow.style.display = 'block';
+    } else {
+        bulkSteamGuardRow.style.display = 'none';
+        document.getElementById('bulkBackupCodes').value = '';
+    }
+    
+    // Oyun listesini temizle
+    if (selectedPlatform === 'xbox' || selectedPlatform === 'playstation') {
+        bulkGame.innerHTML = '<option value="">Oyun seçin (Opsiyonel - Genel hesap için boş bırakın)</option>';
+    } else {
+        bulkGame.innerHTML = '<option value="">Oyun seçin...</option>';
+    }
+    
+    if (selectedPlatform && gameData[selectedPlatform]) {
+        gameData[selectedPlatform].forEach(game => {
+            const option = document.createElement('option');
+            option.value = game;
+            option.textContent = game;
+            bulkGame.appendChild(option);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Sayfa yüklendiğinde oyunları çek
+    await loadGamesFromServer();
+    
+    const form = document.querySelector('form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const platformSelect = document.getElementById('platform');
+    const gameSelect = document.getElementById('game');
+    
+    // Platform dropdown stilini zorla
+    if (platformSelect) {
+        platformSelect.style.backgroundColor = '#1a1a1a';
+        platformSelect.style.color = 'white';
+        
+        const options = platformSelect.querySelectorAll('option');
+        options.forEach(option => {
+            option.style.backgroundColor = '#1a1a1a';
+            option.style.color = 'white';
+        });
+    }
+    
+    // Oyun dropdown stilini zorla
+    if (gameSelect) {
+        gameSelect.style.backgroundColor = '#1a1a1a';
+        gameSelect.style.color = 'white';
+        
+        const options = gameSelect.querySelectorAll('option');
+        options.forEach(option => {
+            option.style.backgroundColor = '#1a1a1a';
+            option.style.color = 'white';
+        });
+    }
+    
+    form.addEventListener('submit', function(e) {
+        if (!platformSelect.value) {
+            e.preventDefault();
+            alert('Lütfen platform seçin!');
+            platformSelect.focus();
+            return false;
+        }
+        
+        // Xbox ve PlayStation için oyun seçimi opsiyonel
+        if (!gameSelect.value && platformSelect.value !== 'xbox' && platformSelect.value !== 'playstation') {
+            e.preventDefault();
+            alert('Lütfen oyun seçin!');
+            gameSelect.focus();
+            return false;
+        }
+        
+        if (!usernameInput.value.trim()) {
+            e.preventDefault();
+            alert('Lütfen kullanıcı adını girin!');
+            usernameInput.focus();
+            return false;
+        }
+        
+        if (!passwordInput.value.trim()) {
+            e.preventDefault();
+            alert('Lütfen şifreyi girin!');
+            passwordInput.focus();
+            return false;
+        }
+        
+        if (passwordInput.value.length < 6) {
+            e.preventDefault();
+            alert('Şifre en az 6 karakter olmalıdır!');
+            passwordInput.focus();
+            return false;
+        }
+    });
+    
+    // Platform değişikliğinde oyun listesini güncelle
+    platformSelect.addEventListener('change', updateGameList);
+    
+    // Sayfa yüklendiğinde platform alanına odaklan
+    platformSelect.focus();
+});
+
+// Toplu hesap ekleme modal'ını göster
+function showBulkAddModal() {
+    const platformSelect = document.getElementById('platform');
+    const gameSelect = document.getElementById('game');
+    const bulkPlatform = document.getElementById('bulkPlatform');
+    const bulkGame = document.getElementById('bulkGame');
+    
+    if (!platformSelect.value || !gameSelect.value) {
+        alert('Lütfen önce platform ve oyun seçin!');
+        return;
+    }
+    
+    // Modal'a değerleri kopyala
+    bulkPlatform.value = platformSelect.value;
+    bulkGame.value = gameSelect.value;
+    
+    // Modal'daki oyun listesini güncelle
+    updateBulkGameList();
+    
+    // Modal'ı aç
+    const modal = new bootstrap.Modal(document.getElementById('bulkAddModal'));
+    modal.show();
+    
+    // Debug için konsola yazdır
+    console.log('Platform:', platformSelect.value);
+    console.log('Game:', gameSelect.value);
+}
+
+// Hesap önizleme
+function previewBulkAccounts() {
+    const accountsText = document.getElementById('bulkAccounts').value.trim();
+    const platform = document.getElementById('bulkPlatform').value;
+    const game = document.getElementById('bulkGame').value;
+    
+    console.log('Preview - Platform:', platform);
+    console.log('Preview - Game:', game);
+    console.log('Preview - Accounts Text:', accountsText);
+    
+    if (!accountsText) {
+        alert('Lütfen hesap listesini girin!');
+        return;
+    }
+    
+    if (!platform || !game) {
+        alert('Platform ve oyun seçimi gerekli!');
+        return;
+    }
+    
+    const accounts = parseAccounts(accountsText);
+    if (accounts.length === 0) {
+        alert('Geçerli hesap bulunamadı!');
+        return;
+    }
+    
+    // Önizleme içeriğini oluştur
+    let previewHtml = `
+        <div class="alert alert-info" style="color: white;">
+            <strong>Platform:</strong> ${platform.toUpperCase()}<br>
+            <strong>Oyun:</strong> ${game}<br>
+            <strong>Toplam Hesap:</strong> ${accounts.length}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Kullanıcı Adı</th>
+                        <th>Şifre</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    accounts.forEach((account, index) => {
+        previewHtml += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${account.username}</td>
+                <td>${'*'.repeat(account.password.length)}</td>
+                <td>${account.description || '-'}</td>
+            </tr>
+        `;
+    });
+    
+    previewHtml += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('previewContent').innerHTML = previewHtml;
+    
+    // Önizleme modal'ını aç
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
+
+// Hesap listesini parse et
+function parseAccounts(text) {
+    const lines = text.split('\n').filter(line => line.trim());
+    const accounts = [];
+    
+    for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        
+        const parts = line.split(':');
+        if (parts.length >= 2) {
+            const username = parts[0].trim();
+            const password = parts[1].trim();
+            const description = parts[2] ? parts[2].trim() : '';
+            
+            if (username && password) {
+                accounts.push({ username, password, description });
+            }
+        }
+    }
+    
+    return accounts;
+}
+
+// Toplu hesapları gönder
+function submitBulkAccounts() {
+    const accountsText = document.getElementById('bulkAccounts').value.trim();
+    const platform = document.getElementById('bulkPlatform').value;
+    const game = document.getElementById('bulkGame').value;
+    
+    console.log('Submit - Platform:', platform);
+    console.log('Submit - Game:', game);
+    console.log('Submit - Accounts Text:', accountsText);
+    
+    if (!accountsText) {
+        alert('Lütfen hesap listesini girin!');
+        return;
+    }
+    
+    if (!platform || !game) {
+        alert('Platform ve oyun seçimi gerekli!');
+        return;
+    }
+    
+    const accounts = parseAccounts(accountsText);
+    if (accounts.length === 0) {
+        alert('Geçerli hesap bulunamadı!');
+        return;
+    }
+    
+    // Backup kodlarını al
+    const backupCodes = document.getElementById('bulkBackupCodes').value.trim();
+    
+    // Backend'e gönder
+    fetch('{{ url_for("bulk_add_accounts") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            platform: platform,
+            game: game,
+            accounts: accounts,
+            backup_codes: backupCodes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Başarılı! ${data.added_count} hesap eklendi. Oluşturulan kodlar:\n${data.codes.join('\n')}`);
+            
+            // Modal'ları kapat
+            bootstrap.Modal.getInstance(document.getElementById('bulkAddModal')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
+            
+            // Ana sayfaya yönlendir
+            window.location.href = '{{ url_for("admin_dashboard") }}';
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+    });
+}
+
+// Önizleme modal'ından onayla
+function confirmBulkAccounts() {
+    submitBulkAccounts();
+}
+</script>
+
+<style>
+.platform-select, .game-select {
+    background-color: #1a1a1a !important;
+    border: 2px solid var(--border-color);
+    color: white !important;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.platform-select:focus, .game-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    background-color: #1a1a1a !important;
+    color: white !important;
+}
+
+.platform-select option, .game-select option {
+    background-color: #1a1a1a !important;
+    color: white !important;
+    padding: 8px;
+}
+
+.platform-select option:hover, .game-select option:hover {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+}
+</style>
+{% endblock %} 

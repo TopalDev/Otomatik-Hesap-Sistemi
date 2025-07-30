@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-gamepad" style="font-size: 4rem; color: var(--secondary-color);"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-4 animated-title">Otomatik Hesap Sistemi</h1>
+                <p class="lead mb-5">Güvenli ve hızlı oyun hesap erişimi için 6 haneli kod sistemi</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="#categories" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i>Hemen Başla
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5" id="categories">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h2 class="display-5 fw-bold mb-4 animated-title">🎮 Oyun Kategorileri</h2>
+            <p class="lead">Hangi platform için hesap arıyorsunuz?</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100 category-card" onclick="window.location.href='{{ url_for('redeem', platform='steam') }}'">
+                <div class="card-body text-center">
+                    <div class="category-icon mb-4">
+                        <i class="fab fa-steam fa-4x" style="color: var(--secondary-color);"></i>
+                    </div>
+                    <h3 class="card-title fw-bold title-steam">Steam</h3>
+                    <p class="card-text">Steam hesapları için güvenli erişim sistemi. Binlerce oyun, tek hesap!</p>
+                    <div class="mt-3">
+                        <span class="badge bg-success me-2">Popüler</span>
+                        <span class="badge bg-info">Anında Erişim</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100 category-card" onclick="window.location.href='{{ url_for('redeem', platform='xbox') }}'">
+                <div class="card-body text-center">
+                    <div class="category-icon mb-4">
+                        <i class="fab fa-xbox fa-4x" style="color: var(--success-color);"></i>
+                    </div>
+                    <h3 class="card-title fw-bold title-xbox">Xbox</h3>
+                    <p class="card-text">Xbox Game Pass ve oyun hesapları. Microsoft ekosisteminin tüm avantajları!</p>
+                    <div class="mt-3">
+                        <span class="badge bg-warning me-2">Game Pass</span>
+                        <span class="badge bg-primary">Xbox Live</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100 category-card" onclick="window.location.href='{{ url_for('redeem', platform='playstation') }}'">
+                <div class="card-body text-center">
+                    <div class="category-icon mb-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg" alt="PlayStation" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                    </div>
+                    <h3 class="card-title fw-bold title-playstation">PlayStation</h3>
+                    <p class="card-text">PlayStation Network hesapları. PS Plus ve özel oyunlara erişim!</p>
+                    <div class="mt-3">
+                        <span class="badge bg-danger me-2">PS Plus</span>
+                        <span class="badge bg-secondary">PSN</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title" style="color: white;">🔒 Güvenli Erişim</h5>
+                    <p class="card-text">6 haneli benzersiz kodlar ile güvenli hesap erişimi. Kodlar tek kullanımlık ve zaman sınırlıdır.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title" style="color: white;">⚡ Hızlı İşlem</h5>
+                    <p class="card-text">Anında kod doğrulama ve hesap bilgilerine erişim. Zaman kaybetmeden oyununuza başlayın.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title" style="color: white;">📊 Detaylı Log</h5>
+                    <p class="card-text">Tüm erişimler IP adresi ve zaman damgası ile loglanır. Güvenlik önceliğimizdir.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-4">🚀 Hemen Başlayın</h4>
+                    <p class="card-text mb-4">Oyun hesabınıza erişmek için yukarıdaki kategorilerden birini seçin</p>
+                    <a href="#categories" class="btn btn-primary btn-lg">
+                        <i class="fas fa-gamepad me-2"></i>Kategorileri Görüntüle
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SSS Bölümü -->
+<div class="faq-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">❓ Sık Sorulan Sorular</h2>
+                <p class="lead">Merak ettiğiniz soruların cevapları burada!</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Kod nasıl çalışır?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Satıcıdan aldığınız 6 haneli kodu ilgili platform sayfasında girin. Sistem otomatik olarak hesap bilgilerini ve Steam Guard backup kodunu size verecektir. Kodlar tek kullanımlıktır ve sınırsız süre geçerlidir.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Güvenlik nasıl sağlanıyor?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Tüm şifreler güvenli şekilde şifrelenmiş olarak saklanır. Kod kullanımında IP adresiniz ve zaman damgası kaydedilir. Bu sayede kodunuzun gerçekten kullanılıp kullanılmadığını takip edebilir ve sahte "kod geçersiz" taleplerini önleyebiliriz. Kodlar tek kullanımlıktır ve her kod için farklı Steam Guard backup kodu verilir.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-key me-2"></i>
+                        Steam Guard backup kodu nedir?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Steam Guard backup kodları, hesabınıza giriş yaparken 2FA doğrulaması gerektiğinde kullanılır. Her kod kullanımında farklı backup kodu alırsınız. Bu kodlar tek kullanımlıktır ve güvenliğiniz için önemlidir.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-clock me-2"></i>
+                        Kod süresi ne kadar?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Kodlar sınırsız süre geçerlidir. Ancak kod bir kez kullanıldıktan sonra tekrar kullanılamaz. Yeni hesap almak için yeni kod satın almanız gerekir.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Kod çalışmıyor, ne yapmalıyım?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Kodunuzu doğru girdiğinizden emin olun. Büyük/küçük harf fark etmez. Kod daha önce kullanılmışsa satıcıyla iletişime geçin. Doğru platform ve oyun seçtiğinizden emin olun.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-users me-2"></i>
+                        Hangi platformlar destekleniyor?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Steam, Xbox ve PlayStation platformları desteklenmektedir. Steam için oyun seçimi zorunludur, Xbox ve PlayStation için opsiyoneldir. Her platform için ayrı hesap türleri mevcuttur.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-download me-2"></i>
+                        Hesap bilgilerini nasıl kaydedebilirim?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Hesap bilgilerinizi aldıktan sonra "İndir" butonuna tıklayarak bilgileri metin dosyası olarak bilgisayarınıza kaydedebilirsiniz. Bu dosyada kullanıcı adı, şifre ve Steam Guard backup kodu bulunur.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <i class="fas fa-headset me-2"></i>
+                        Destek almak için ne yapmalıyım?
+                    </div>
+                    <div class="faq-answer" style="display: none;">
+                        <p>Herhangi bir sorun yaşarsanız satıcınızla iletişime geçin. Satıcı bilgileri hesap satın alırken size verilmiştir. Sistem sorunları için satıcı size yardımcı olacaktır.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFAQ(element) {
+    const answer = element.nextElementSibling;
+    const isVisible = answer.style.display !== 'none';
+    
+    // Tüm cevapları gizle
+    document.querySelectorAll('.faq-answer').forEach(ans => {
+        ans.style.display = 'none';
+    });
+    
+    // Tıklanan sorunun cevabını göster/gizle
+    if (!isVisible) {
+        answer.style.display = 'block';
+    }
+}
+</script>
+{% endblock %} 

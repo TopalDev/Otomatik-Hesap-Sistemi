@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Steam Oyunları - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                    </div>
+                    <h2 class="card-title mb-4 title-steam">
+                        <i class="fas fa-gamepad me-2"></i>Steam Oyunları
+                    </h2>
+                    <p class="card-text mb-4">Hangi oyun için hesap arıyorsunuz?</p>
+                    
+                    {% if games %}
+                    <div class="game-list-container">
+                        <div class="form-group">
+                            <label for="gameSelect" class="form-label">
+                                <i class="fas fa-list me-2"></i>Oyun Seçin
+                            </label>
+                            <select class="form-control form-control-lg game-select" id="gameSelect" onchange="selectGame()">
+                                <option value="">Oyun seçin...</option>
+                                {% for game in games %}
+                                <option value="{{ game.id }}">{{ game.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <button id="continueBtn" class="btn btn-primary btn-lg" disabled onclick="continueToGame()">
+                                <i class="fas fa-arrow-right me-2"></i>Devam Et
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h5>Henüz Oyun Eklenmemiş</h5>
+                        <p class="text-muted">Steam oyunları henüz eklenmemiş. Lütfen daha sonra tekrar deneyin.</p>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Ana Sayfa
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.game-select {
+    background-color: #1a1a1a !important;
+    border: 2px solid var(--border-color);
+    color: white !important;
+    font-size: 1.1rem;
+    padding: 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+    padding-right: 50px;
+}
+
+.game-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    background-color: var(--card-bg);
+    color: white;
+}
+
+.game-select option {
+    background-color: #1a1a1a !important;
+    color: white !important;
+    padding: 10px;
+}
+
+.game-select option:hover {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+}
+
+/* Dropdown açıldığında arka plan rengi */
+.game-select:focus option {
+    background-color: #1a1a1a !important;
+    color: white !important;
+}
+
+/* Dropdown container arka plan rengi */
+select.game-select {
+    background-color: var(--card-bg) !important;
+    color: white !important;
+}
+
+.game-list-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#continueBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#continueBtn:not(:disabled) {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+
+<script>
+function selectGame() {
+    const gameSelect = document.getElementById('gameSelect');
+    const continueBtn = document.getElementById('continueBtn');
+    
+    if (gameSelect.value) {
+        continueBtn.disabled = false;
+        continueBtn.classList.add('btn-success');
+        continueBtn.classList.remove('btn-primary');
+    } else {
+        continueBtn.disabled = true;
+        continueBtn.classList.remove('btn-success');
+        continueBtn.classList.add('btn-primary');
+    }
+}
+
+function continueToGame() {
+    const gameSelect = document.getElementById('gameSelect');
+    const selectedGameId = gameSelect.value;
+    
+    if (selectedGameId) {
+        window.location.href = `/redeem/game/${selectedGameId}`;
+    }
+}
+
+// Sayfa yüklendiğinde dropdown'a odaklan
+document.addEventListener('DOMContentLoaded', function() {
+    const gameSelect = document.getElementById('gameSelect');
+    if (gameSelect) {
+        gameSelect.focus();
+        
+        // Dropdown stilini zorla
+        gameSelect.style.backgroundColor = '#1a1a1a';
+        gameSelect.style.color = 'white';
+        
+        // Tüm option'ları koyu tema yap
+        const options = gameSelect.querySelectorAll('option');
+        options.forEach(option => {
+            option.style.backgroundColor = '#1a1a1a';
+            option.style.color = 'white';
+        });
+    }
+});
+</script>
+{% endblock %} 

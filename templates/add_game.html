@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Oyun Ekle - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0" style="color: white;">
+                        <i class="fas fa-plus me-2"></i>Yeni Oyun Ekle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label" style="color: white;">
+                                        <i class="fas fa-gamepad me-1"></i>Oyun Adı
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="name" 
+                                           name="name" 
+                                           required 
+                                           placeholder="Counter-Strike 2">
+                                    <div class="form-text" style="color: white;">
+                                        Oyunun tam adını girin
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="platform" class="form-label" style="color: white;">
+                                        <i class="fas fa-desktop me-1"></i>Platform
+                                    </label>
+                                    <select class="form-control platform-select" id="platform" name="platform" required>
+                                        <option value="">Platform seçin...</option>
+                                        <option value="steam">Steam</option>
+                                        <option value="xbox">Xbox</option>
+                                        <option value="playstation">PlayStation</option>
+                                    </select>
+                                    <div class="form-text" style="color: white;">
+                                        Oyunun platformunu seçin
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bilgi:</strong> Eklenen oyunlar kullanıcılar tarafından seçilebilir hale gelir.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Oyunu Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: white;">
+                        <i class="fas fa-lightbulb me-2"></i>Oyun Ekleme İpuçları
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Oyun adını tam olarak yazın (örn: Counter-Strike 2)
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Doğru platformu seçin
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Oyun adında özel karakterler kullanmayın
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const nameInput = document.getElementById('name');
+    const platformSelect = document.getElementById('platform');
+    
+    form.addEventListener('submit', function(e) {
+        if (!nameInput.value.trim()) {
+            e.preventDefault();
+            alert('Lütfen oyun adını girin!');
+            nameInput.focus();
+            return false;
+        }
+        
+        if (!platformSelect.value) {
+            e.preventDefault();
+            alert('Lütfen platform seçin!');
+            platformSelect.focus();
+            return false;
+        }
+    });
+    
+    // Sayfa yüklendiğinde oyun adı alanına odaklan
+    nameInput.focus();
+    
+    // Platform dropdown stilini zorla
+    const platformDropdown = document.getElementById('platform');
+    if (platformDropdown) {
+        platformDropdown.style.backgroundColor = '#1a1a1a';
+        platformDropdown.style.color = 'white';
+        
+        // Tüm option'ları koyu tema yap
+        const options = platformDropdown.querySelectorAll('option');
+        options.forEach(option => {
+            option.style.backgroundColor = '#1a1a1a';
+            option.style.color = 'white';
+        });
+    }
+    });
+</script>
+
+<style>
+.platform-select {
+    background-color: #1a1a1a !important;
+    border: 2px solid var(--border-color);
+    color: white !important;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.platform-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    background-color: #1a1a1a !important;
+    color: white !important;
+}
+
+.platform-select option {
+    background-color: #1a1a1a !important;
+    color: white !important;
+    padding: 8px;
+}
+
+.platform-select option:hover {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+}
+</style>
+{% endblock %} 

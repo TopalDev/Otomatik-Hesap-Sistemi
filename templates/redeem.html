@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Kod Kullan - {{ platform|title }} Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        {% if platform == 'steam' %}
+                            <i class="fab fa-steam fa-4x" style="color: var(--secondary-color);"></i>
+                        {% elif platform == 'xbox' %}
+                            <i class="fab fa-xbox fa-4x" style="color: var(--success-color);"></i>
+                        {% elif platform == 'playstation' %}
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/PlayStation_logo.svg" alt="PlayStation" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                        {% else %}
+                            <i class="fas fa-gamepad fa-4x" style="color: var(--secondary-color);"></i>
+                        {% endif %}
+                    </div>
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-key me-2"></i>{{ platform|title }} Hesap Kodu
+                    </h2>
+                    <p class="card-text mb-4">Satıcıdan aldığınız 6 haneli kodu girin</p>
+                    
+                    <form method="POST" class="needs-validation" novalidate>
+                        <input type="hidden" name="platform" value="{{ platform }}">
+                        
+                        {% if platform in ['xbox', 'playstation'] %}
+                        <!-- Xbox ve PlayStation için opsiyonel oyun seçimi -->
+                        <div class="mb-4">
+                            <label for="game" class="form-label">Oyun (Opsiyonel)</label>
+                            <select class="form-select" id="game" name="game">
+                                <option value="">Oyun seçmeyin (Genel hesap)</option>
+                                {% if platform == 'xbox' %}
+                                    <option value="Xbox Game Pass">Xbox Game Pass</option>
+                                    <option value="Xbox Live Gold">Xbox Live Gold</option>
+                                    <option value="Xbox Ultimate">Xbox Ultimate</option>
+                                    <option value="Minecraft">Minecraft</option>
+                                    <option value="Forza Horizon 5">Forza Horizon 5</option>
+                                    <option value="Halo Infinite">Halo Infinite</option>
+                                    <option value="Gears 5">Gears 5</option>
+                                    <option value="Sea of Thieves">Sea of Thieves</option>
+                                    <option value="State of Decay 2">State of Decay 2</option>
+                                    <option value="Ori and the Will of the Wisps">Ori and the Will of the Wisps</option>
+                                {% elif platform == 'playstation' %}
+                                    <option value="PlayStation Plus">PlayStation Plus</option>
+                                    <option value="PlayStation Now">PlayStation Now</option>
+                                    <option value="God of War">God of War</option>
+                                    <option value="Spider-Man">Spider-Man</option>
+                                    <option value="The Last of Us">The Last of Us</option>
+                                    <option value="Uncharted">Uncharted</option>
+                                    <option value="Horizon Zero Dawn">Horizon Zero Dawn</option>
+                                    <option value="Ghost of Tsushima">Ghost of Tsushima</option>
+                                    <option value="Bloodborne">Bloodborne</option>
+                                    <option value="Demon's Souls">Demon's Souls</option>
+                                {% endif %}
+                            </select>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Genelde hesap bazında verilir, oyun seçmek opsiyoneldir
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-4">
+                            <label for="code" class="form-label">6 Haneli Kod</label>
+                            <input type="text" 
+                                   class="form-control code-input" 
+                                   id="code" 
+                                   name="code" 
+                                   maxlength="6" 
+                                   placeholder="A1B2C3" 
+                                   required 
+                                   autocomplete="off">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sadece harf ve rakam kullanın
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-unlock me-2"></i>Kodu Doğrula
+                        </button>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Güvenlik:</strong> Kodunuz tek kullanımlıktır ve sınırsız süre geçerlidir.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-question-circle me-2"></i>Yardım
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kodunuzu doğru girdiğinizden emin olun
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Büyük/küçük harf fark etmez
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kod süresi dolmuşsa satıcıyla iletişime geçin
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Tek kullanımlık kodlar tekrar kullanılamaz
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInput = document.getElementById('code');
+    
+    // Otomatik büyük harf ve format
+    codeInput.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+    
+    // Form doğrulama
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const code = codeInput.value.trim();
+        
+        if (code.length !== 6) {
+            e.preventDefault();
+            alert('Lütfen 6 haneli bir kod girin!');
+            codeInput.focus();
+            return false;
+        }
+        
+        if (!/^[A-Z0-9]{6}$/.test(code)) {
+            e.preventDefault();
+            alert('Kod sadece harf ve rakamlardan oluşmalıdır!');
+            codeInput.focus();
+            return false;
+        }
+    });
+    
+    // Sayfa yüklendiğinde input'a odaklan
+    codeInput.focus();
+});
+</script>
+{% endblock %} 

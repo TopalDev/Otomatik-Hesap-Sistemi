@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Toplu Oyun Ekle - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0" style="color: white;">
+                        <i class="fas fa-upload me-2"></i>Toplu Oyun Ekle
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="platform" class="form-label" style="color: white;">
+                                        <i class="fas fa-desktop me-1"></i>Platform
+                                    </label>
+                                    <select class="form-control platform-select" id="platform" name="platform" required>
+                                        <option value="">Platform seçin...</option>
+                                        <option value="steam">Steam</option>
+                                        <option value="xbox">Xbox</option>
+                                        <option value="playstation">PlayStation</option>
+                                    </select>
+                                    <div class="form-text" style="color: white;">
+                                        Oyunların platformunu seçin
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="game_file" class="form-label" style="color: white;">
+                                        <i class="fas fa-file-text me-1"></i>Oyun Listesi Dosyası
+                                    </label>
+                                    <input type="file" 
+                                           class="form-control" 
+                                           id="game_file" 
+                                           name="game_file" 
+                                           accept=".txt"
+                                           required>
+                                    <div class="form-text" style="color: white;">
+                                        Her satırda bir oyun adı olacak şekilde .txt dosyası yükleyin
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong style="color: white;">Bilgi:</strong> <span style="color: white;">Dosya formatı: Her satırda bir oyun adı. Örnek: Counter-Strike 2, Dota 2, PUBG</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>Oyunları Yükle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if games %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0" style="color: white;">
+                        <i class="fas fa-list me-2"></i>Yüklenecek Oyunlar ({{ games|length }} adet)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for game in games %}
+                        <div class="col-md-4 mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-gamepad text-success me-2"></i>
+                                <span style="color: white;">{{ game }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-success" onclick="confirmAdd()">
+                            <i class="fas fa-check me-2"></i>Oyunları Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: white;">
+                        <i class="fas fa-lightbulb me-2"></i>Toplu Ekleme İpuçları
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            .txt dosyası kullanın, her satırda bir oyun adı
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Platform seçimini doğru yapın
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Oyun adlarında özel karakterler kullanmayın
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Dosya boyutu 1MB'dan küçük olmalı
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.platform-select {
+    background-color: #1a1a1a !important;
+    border: 2px solid var(--border-color);
+    color: white !important;
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.platform-select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+    background-color: #1a1a1a !important;
+    color: white !important;
+}
+
+.platform-select option {
+    background-color: #1a1a1a !important;
+    color: white !important;
+    padding: 8px;
+}
+
+.platform-select option:hover {
+    background-color: var(--secondary-color) !important;
+    color: white !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const platformSelect = document.getElementById('platform');
+    const gameFile = document.getElementById('game_file');
+    
+    // Platform dropdown stilini zorla
+    if (platformSelect) {
+        platformSelect.style.backgroundColor = '#1a1a1a';
+        platformSelect.style.color = 'white';
+        
+        const options = platformSelect.querySelectorAll('option');
+        options.forEach(option => {
+            option.style.backgroundColor = '#1a1a1a';
+            option.style.color = 'white';
+        });
+    }
+    
+    form.addEventListener('submit', function(e) {
+        if (!platformSelect.value) {
+            e.preventDefault();
+            alert('Lütfen platform seçin!');
+            platformSelect.focus();
+            return false;
+        }
+        
+        if (!gameFile.files[0]) {
+            e.preventDefault();
+            alert('Lütfen oyun listesi dosyası seçin!');
+            gameFile.focus();
+            return false;
+        }
+        
+        const file = gameFile.files[0];
+        if (file.size > 1024 * 1024) { // 1MB
+            e.preventDefault();
+            alert('Dosya boyutu 1MB\'dan küçük olmalıdır!');
+            return false;
+        }
+    });
+    
+    // Sayfa yüklendiğinde platform alanına odaklan
+    platformSelect.focus();
+});
+
+function confirmAdd() {
+    if (confirm('{{ games|length }} oyunu eklemek istediğinizden emin misiniz?')) {
+        // AJAX ile oyunları ekle
+        fetch('{{ url_for("bulk_add_games") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                platform: '{{ platform }}',
+                games: {{ games|tojson if games else '[]' }}
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Oyunlar başarıyla eklendi!');
+                window.location.href = '{{ url_for("admin_dashboard") }}';
+            } else {
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+</script>
+{% endblock %} 

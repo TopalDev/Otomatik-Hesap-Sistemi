@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="admin-sidebar p-3">
+                <h5 class="text-center mb-4">
+                    <i class="fas fa-cog me-2"></i>Admin Panel
+                </h5>
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ url_for('add_account') }}">
+                        <i class="fas fa-plus me-2"></i>Hesap Ekle
+                    </a>
+                    <a class="nav-link" href="{{ url_for('add_game') }}">
+                        <i class="fas fa-gamepad me-2"></i>Oyun Ekle
+                    </a>
+                    <a class="nav-link" href="{{ url_for('bulk_add_games') }}">
+                        <i class="fas fa-upload me-2"></i>Toplu Oyun Ekle
+                    </a>
+                    <a class="nav-link" href="{{ url_for('generate_access_code') }}">
+                        <i class="fas fa-key me-2"></i>Kod Oluştur
+                    </a>
+                    <a class="nav-link" href="{{ url_for('change_password') }}">
+                        <i class="fas fa-user-cog me-2"></i>Şifre Değiştir
+                    </a>
+                    <a class="nav-link" href="{{ url_for('discord_webhook_settings') }}">
+                        <i class="fab fa-discord me-2"></i>Discord Webhook
+                    </a>
+                    <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Çıkış
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h6><i class="fas fa-users me-2"></i>Toplam Hesap</h6>
+                        <h3>{{ accounts|length }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h6><i class="fas fa-key me-2"></i>Aktif Kod</h6>
+                        <h3>{{ codes|selectattr('is_used', 'equalto', false)|list|length }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h6><i class="fas fa-check-circle me-2"></i>Kullanılan Hesap</h6>
+                        <h3>{{ accounts|selectattr('is_used', 'equalto', true)|list|length }}</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h6><i class="fas fa-clock me-2"></i>Bekleyen Kod</h6>
+                        <h3>{{ codes|selectattr('is_used', 'equalto', false)|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toplu Veri Silme -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Tehlikeli İşlemler
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Uyarı:</strong> Bu işlemler geri alınamaz! Tüm veriler kalıcı olarak silinecektir.
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-danger" onclick="clearAllData()">
+                                    <i class="fas fa-trash me-2"></i>Tüm Verileri Sil
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="clearUsedAccounts()">
+                                    <i class="fas fa-user-times me-2"></i>Kullanılan Hesapları Sil
+                                </button>
+                                <button class="btn btn-outline-info" onclick="clearExpiredCodes()">
+                                    <i class="fas fa-infinity me-2"></i>Sınırsız Kodlar (Bilgi)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Steam Hesapları -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Steam Hesapları
+                        <span class="badge bg-secondary ms-2">{{ accounts_pagination.total }}</span>
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <!-- Sayfa başına gösterim seçimi -->
+                        <select class="form-select form-select-sm me-2" style="width: auto;" onchange="changePerPage(this.value)">
+                            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+                        </select>
+                        <a href="{{ url_for('add_account') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Yeni Hesap
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filtreleme -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="accounts_platform" class="form-label">Platform</label>
+                            <select class="form-select form-select-sm" id="accounts_platform" onchange="applyAccountsFilter()">
+                                <option value="">Tümü</option>
+                                <option value="steam" {% if accounts_platform == 'steam' %}selected{% endif %}>Steam</option>
+                                <option value="xbox" {% if accounts_platform == 'xbox' %}selected{% endif %}>Xbox</option>
+                                <option value="playstation" {% if accounts_platform == 'playstation' %}selected{% endif %}>PlayStation</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="accounts_game" class="form-label">Oyun</label>
+                            <select class="form-select form-select-sm" id="accounts_game" onchange="applyAccountsFilter()">
+                                <option value="">Tümü</option>
+                                {% for game in games %}
+                                    <option value="{{ game.name }}" {% if accounts_game == game.name %}selected{% endif %}>{{ game.name }} ({{ game.platform|title }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearAccountsFilter()">
+                                <i class="fas fa-times me-1"></i>Filtreyi Temizle
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {% if accounts_pagination.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Platform</th>
+                                    <th>Oyun</th>
+                                    <th>Durum</th>
+                                    <th>Oluşturulma</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in accounts_pagination.items %}
+                                <tr>
+                                    <td>{{ account.id }}</td>
+                                    <td>{{ account.username }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ account.platform|title }}</span>
+                                    </td>
+                                    <td>{{ account.game }}</td>
+                                    <td>
+                                        {% if account.is_used %}
+                                            <span class="badge bg-success">Kullanıldı</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Bekliyor</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ account.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('delete_account', account_id=account.id) }}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Bu hesabı silmek istediğinizden emin misiniz?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Sayfalama -->
+                    {% if accounts_pagination.pages > 1 %}
+                    <nav aria-label="Hesaplar sayfalama">
+                        <ul class="pagination justify-content-center">
+                            {% if accounts_pagination.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=accounts_pagination.prev_num, codes_page=codes_page, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in accounts_pagination.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != accounts_pagination.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=page_num, codes_page=codes_page, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if accounts_pagination.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=accounts_pagination.next_num, codes_page=codes_page, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Henüz hesap eklenmemiş</p>
+                        <a href="{{ url_for('add_account') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>İlk Hesabı Ekle
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Oyunlar -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0" style="color: white;">
+                        <i class="fas fa-gamepad me-2"></i>Oyunlar
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('add_game') }}" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-plus me-1"></i>Yeni Oyun
+                        </a>
+                        <a href="{{ url_for('bulk_add_games') }}" class="btn btn-success btn-sm me-2">
+                            <i class="fas fa-upload me-1"></i>Toplu Ekle
+                        </a>
+                        <button class="btn btn-warning btn-sm me-2" onclick="selectAllGames()">
+                            <i class="fas fa-check-square me-1"></i>Tümünü Seç
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSelectedGames()" id="deleteSelectedBtn" disabled>
+                            <i class="fas fa-trash me-1"></i>Seçilenleri Sil
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if games %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr style="color: white;">
+                                    <th>
+                                        <input type="checkbox" id="selectAll" onchange="toggleAllGames()">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Oyun Adı</th>
+                                    <th>Platform</th>
+                                    <th>Durum</th>
+                                    <th>Oluşturulma</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for game in games %}
+                                <tr style="color: white;">
+                                    <td>
+                                        <input type="checkbox" class="game-checkbox" value="{{ game.id }}" onchange="updateDeleteButton()">
+                                    </td>
+                                    <td>{{ game.id }}</td>
+                                    <td>{{ game.name }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ game.platform|title }}</span>
+                                    </td>
+                                    <td>
+                                        {% if game.is_active %}
+                                            <span class="badge bg-success">Aktif</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Pasif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ game.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('delete_game', game_id=game.id) }}" class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Bu oyunu silmek istediğinizden emin misiniz?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-gamepad fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Henüz oyun eklenmemiş</p>
+                        <a href="{{ url_for('add_game') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>İlk Oyunu Ekle
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Erişim Kodları -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Erişim Kodları
+                        <span class="badge bg-secondary ms-2">{{ codes_pagination.total }}</span>
+                    </h5>
+                    <a href="{{ url_for('generate_access_code') }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Yeni Kod
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Filtreleme -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="codes_platform" class="form-label">Platform</label>
+                            <select class="form-select form-select-sm" id="codes_platform" onchange="applyCodesFilter()">
+                                <option value="">Tümü</option>
+                                <option value="steam" {% if codes_platform == 'steam' %}selected{% endif %}>Steam</option>
+                                <option value="xbox" {% if codes_platform == 'xbox' %}selected{% endif %}>Xbox</option>
+                                <option value="playstation" {% if codes_platform == 'playstation' %}selected{% endif %}>PlayStation</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="codes_game" class="form-label">Oyun</label>
+                            <select class="form-select form-select-sm" id="codes_game" onchange="applyCodesFilter()">
+                                <option value="">Tümü</option>
+                                {% for game in games %}
+                                    <option value="{{ game.name }}" {% if codes_game == game.name %}selected{% endif %}>{{ game.name }} ({{ game.platform|title }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearCodesFilter()">
+                                <i class="fas fa-times me-1"></i>Filtreyi Temizle
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {% if codes_pagination.items %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Kod</th>
+                                    <th>Hesap ID</th>
+                                    <th>Platform</th>
+                                    <th>Oyun</th>
+                                    <th>Durum</th>
+                                    <th>Oluşturulma</th>
+                                    <th>Bitiş</th>
+                                    <th>Kullanım</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for code in codes_pagination.items %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary fs-6">{{ code.code }}</span>
+                                    </td>
+                                    <td>{{ code.account_id }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ code.account.platform|title }}</span>
+                                    </td>
+                                    <td>{{ code.account.game }}</td>
+                                    <td>
+                                        {% if code.is_used %}
+                                            <span class="badge bg-success">Kullanıldı</span>
+                                        {% elif code.expires_at and code.expires_at < now %}
+                                            <span class="badge bg-danger">Süresi Doldu</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Aktif</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ code.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if code.expires_at %}
+                                            {{ code.expires_at.strftime('%d.%m.%Y %H:%M') }}
+                                        {% else %}
+                                            <span class="text-success">Sınırsız</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if code.is_used %}
+                                            {{ code.used_at.strftime('%d.%m.%Y %H:%M') if code.used_at else 'N/A' }}
+                                            <br><small class="text-muted">{{ code.used_ip or 'N/A' }}</small>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('delete_code', code_id=code.id) }}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Bu kodu silmek istediğinizden emin misiniz?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Sayfalama -->
+                    {% if codes_pagination.pages > 1 %}
+                    <nav aria-label="Kodlar sayfalama">
+                        <ul class="pagination justify-content-center">
+                            {% if codes_pagination.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=accounts_page, codes_page=codes_pagination.prev_num, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for page_num in codes_pagination.iter_pages() %}
+                                {% if page_num %}
+                                    {% if page_num != codes_pagination.page %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=accounts_page, codes_page=page_num, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ page_num }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if codes_pagination.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin_dashboard', accounts_page=accounts_page, codes_page=codes_pagination.next_num, per_page=per_page, accounts_platform=accounts_platform, accounts_game=accounts_game, codes_platform=codes_platform, codes_game=codes_game) }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-key fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Henüz kod oluşturulmamış</p>
+                        <a href="{{ url_for('generate_access_code') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>İlk Kodu Oluştur
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tüm oyunları seç/kaldır
+function toggleAllGames() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const gameCheckboxes = document.querySelectorAll('.game-checkbox');
+    
+    gameCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    
+    updateDeleteButton();
+}
+
+// Seçilen oyunları sil
+function deleteSelectedGames() {
+    const selectedCheckboxes = document.querySelectorAll('.game-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        alert('Lütfen silinecek oyunları seçin!');
+        return;
+    }
+    
+    if (confirm(`${selectedIds.length} oyunu silmek istediğinizden emin misiniz?`)) {
+        // AJAX ile toplu silme
+        fetch('{{ url_for("bulk_delete_games") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                game_ids: selectedIds
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Oyunlar başarıyla silindi!');
+                location.reload();
+            } else {
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+}
+
+// Silme butonunu güncelle
+function updateDeleteButton() {
+    const selectedCheckboxes = document.querySelectorAll('.game-checkbox:checked');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    
+    if (selectedCheckboxes.length > 0) {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = `Seçilenleri Sil (${selectedCheckboxes.length})`;
+    } else {
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Seçilenleri Sil';
+    }
+}
+
+    // Sayfa yüklendiğinde aktif menü öğesini işaretle
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        updateDeleteButton();
+    });
+    
+    // Tüm verileri sil
+    function clearAllData() {
+        if (confirm('TÜM VERİLERİ SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!\n- Tüm hesaplar silinecek\n- Tüm kodlar silinecek\n- Tüm oyunlar silinecek')) {
+            if (confirm('SON KEZ ONAYLIYOR MUSUNUZ?\n\nBu işlem tüm verileri kalıcı olarak silecektir!')) {
+                fetch('{{ url_for("clear_all_data") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Tüm veriler başarıyla silindi!');
+                        location.reload();
+                    } else {
+                        alert('Hata: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Bir hata oluştu!');
+                });
+            }
+        }
+    }
+    
+    // Kullanılan hesapları sil
+    function clearUsedAccounts() {
+        if (confirm('Kullanılan hesapları silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!')) {
+            fetch('{{ url_for("clear_used_accounts") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${data.deleted_count} kullanılan hesap silindi!`);
+                    location.reload();
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu!');
+            });
+        }
+    }
+    
+    // Sınırsız kodlar hakkında bilgi
+    function clearExpiredCodes() {
+        fetch('{{ url_for("clear_expired_codes") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+            } else {
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+    
+    // Sayfa başına gösterim sayısını değiştir
+    function changePerPage(perPage) {
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('per_page', perPage);
+        currentUrl.searchParams.set('accounts_page', '1'); // Hesaplar ilk sayfaya dön
+        currentUrl.searchParams.set('codes_page', '1'); // Kodlar ilk sayfaya dön
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Hesaplar filtreleme
+    function applyAccountsFilter() {
+        const currentUrl = new URL(window.location);
+        const platform = document.getElementById('accounts_platform').value;
+        const game = document.getElementById('accounts_game').value;
+        
+        if (platform) {
+            currentUrl.searchParams.set('accounts_platform', platform);
+        } else {
+            currentUrl.searchParams.delete('accounts_platform');
+        }
+        
+        if (game) {
+            currentUrl.searchParams.set('accounts_game', game);
+        } else {
+            currentUrl.searchParams.delete('accounts_game');
+        }
+        
+        currentUrl.searchParams.set('accounts_page', '1'); // İlk sayfaya dön
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Hesaplar filtresini temizle
+    function clearAccountsFilter() {
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.delete('accounts_platform');
+        currentUrl.searchParams.delete('accounts_game');
+        currentUrl.searchParams.set('accounts_page', '1');
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Kodlar filtreleme
+    function applyCodesFilter() {
+        const currentUrl = new URL(window.location);
+        const platform = document.getElementById('codes_platform').value;
+        const game = document.getElementById('codes_game').value;
+        
+        if (platform) {
+            currentUrl.searchParams.set('codes_platform', platform);
+        } else {
+            currentUrl.searchParams.delete('codes_platform');
+        }
+        
+        if (game) {
+            currentUrl.searchParams.set('codes_game', game);
+        } else {
+            currentUrl.searchParams.delete('codes_game');
+        }
+        
+        currentUrl.searchParams.set('codes_page', '1'); // İlk sayfaya dön
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Kodlar filtresini temizle
+    function clearCodesFilter() {
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.delete('codes_platform');
+        currentUrl.searchParams.delete('codes_game');
+        currentUrl.searchParams.set('codes_page', '1');
+        window.location.href = currentUrl.toString();
+    }
+</script>
+{% endblock %} 

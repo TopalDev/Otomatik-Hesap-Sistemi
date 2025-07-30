@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game.name }} - Kod Kullan{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Steam_icon_logo.svg" alt="Steam" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                    </div>
+                    <h2 class="card-title mb-4 title-steam">
+                        <i class="fas fa-key me-2"></i>{{ game.name }} - Kod Kullan
+                    </h2>
+                    <p class="card-text mb-4">Bu oyun için hesap kodunuzu girin</p>
+                    
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <label for="code" class="form-label">6 Haneli Kod</label>
+                            <input type="text" 
+                                   class="form-control code-input" 
+                                   id="code" 
+                                   name="code" 
+                                   maxlength="6" 
+                                   placeholder="A1B2C3" 
+                                   required 
+                                   autocomplete="off">
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sadece harf ve rakam kullanın
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-unlock me-2"></i>Kodu Doğrula
+                        </button>
+                    </form>
+                    
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Güvenlik:</strong> Kodunuz tek kullanımlıktır ve zaman sınırlıdır.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-question-circle me-2"></i>Yardım
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kodunuzu doğru girdiğinizden emin olun
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Büyük/küçük harf fark etmez
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kod süresi dolmuşsa satıcıyla iletişime geçin
+                        </li>
+                        <li class="mb-2" style="color: white;">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Tek kullanımlık kodlar tekrar kullanılamaz
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('steam_games') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Oyun Seçimine Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInput = document.getElementById('code');
+    
+    // Otomatik büyük harf ve format
+    codeInput.addEventListener('input', function(e) {
+        this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    });
+    
+    // Form doğrulama
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const code = codeInput.value.trim();
+        
+        if (code.length !== 6) {
+            e.preventDefault();
+            alert('Lütfen 6 haneli bir kod girin!');
+            codeInput.focus();
+            return false;
+        }
+        
+        if (!/^[A-Z0-9]{6}$/.test(code)) {
+            e.preventDefault();
+            alert('Kod sadece harf ve rakamlardan oluşmalıdır!');
+            codeInput.focus();
+            return false;
+        }
+    });
+    
+    // Sayfa yüklendiğinde input'a odaklan
+    codeInput.focus();
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Hesap Bilgileri - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="card-title mb-4 animated-title">Hesap Bilgileri Başarıyla Alındı!</h2>
+                    <p class="card-text mb-4">Steam hesabınıza erişim bilgileri aşağıda verilmiştir.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="code-display">
+                                <h5><i class="fas fa-user me-2"></i>Kullanıcı Adı</h5>
+                                <div class="fs-4 fw-bold text-primary">{{ account.username }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="code-display">
+                                <h5><i class="fas fa-lock me-2"></i>Şifre</h5>
+                                <div class="fs-4 fw-bold text-primary">{{ account.password_plain }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if account.steam_guard_code or account.backup_codes %}
+                    <div class="row mt-3">
+                        {% if account.steam_guard_code %}
+                        <div class="col-md-6">
+                            <div class="code-display">
+                                <h5><i class="fas fa-shield-alt me-2"></i>Steam Guard Kodu</h5>
+                                <div class="fs-4 fw-bold text-warning">{{ account.steam_guard_code }}</div>
+                                <small class="text-muted">Steam'e giriş yaparken bu kodu kullanın</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if account.backup_codes %}
+                        <div class="col-md-6">
+                            <div class="code-display">
+                                <h5><i class="fas fa-key me-2"></i>Backup Kodu</h5>
+                                <div class="fs-4 fw-bold text-info">
+                                    {% if used_backup_code %}
+                                        <span class="badge bg-success fs-5">{{ used_backup_code }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-5">Tüm kodlar kullanıldı</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Bu kod tek kullanımlıktır, kullanıldıktan sonra işaretlenir</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Önemli:</strong> Bu bilgileri güvenli bir yerde saklayın ve kimseyle paylaşmayın!
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-home me-2"></i>Ana Sayfa
+                        </a>
+                        <button onclick="downloadAccountInfo()" class="btn btn-outline-primary" type="button">
+                            <i class="fas fa-download me-2"></i>İndir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadAccountInfo() {
+    try {
+        console.log('İndirme fonksiyonu çalıştı');
+        
+        // Basit içerik oluştur
+        let content = 'Hesap Bilgileri\n\n';
+        content += 'Kullanıcı Adı: {{ account.username }}\n';
+        content += 'Şifre: {{ account.password_plain }}\n';
+        
+        {% if account.steam_guard_code %}
+        content += '\nSteam Guard Kodu: {{ account.steam_guard_code }}\n';
+        {% endif %}
+        
+        {% if account.backup_codes %}
+        content += '\nBackup Kodu: {{ used_backup_code }}\n';
+        {% endif %}
+        
+        content += '\nBizi tercih ettiğiniz için teşekkürler!';
+        
+        console.log('Content:', content);
+        
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'hesap_bilgileri.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        console.log('İndirme tamamlandı');
+    } catch (error) {
+        console.error('Hata:', error);
+        alert('İndirme sırasında hata oluştu: ' + error.message);
+    }
+}
+</script>
+
+<style>
+@media print {
+    .navbar, .btn, .alert {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    
+    .code-display {
+        border: 2px solid #000 !important;
+        background: white !important;
+        color: black !important;
+    }
+}
+</style>
+{% endblock %} 

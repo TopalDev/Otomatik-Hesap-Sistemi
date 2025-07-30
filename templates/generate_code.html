@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Kod Oluştur - Otomatik Hesap Sistemi{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Yeni Erişim Kodu Oluştur
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if accounts %}
+                    <form method="POST" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="account_id" class="form-label">
+                                <i class="fas fa-user me-1"></i>Steam Hesabı Seçin
+                            </label>
+                            <select class="form-control" id="account_id" name="account_id" required>
+                                <option value="">Hesap seçin...</option>
+                                {% for account in accounts %}
+                                <option value="{{ account.id }}">
+                                    ID: {{ account.id }} - {{ account.username }} ({{ account.platform|title }} - {{ account.game }})
+                                    {% if account.is_used %}
+                                        (Kullanıldı)
+                                    {% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Kullanılmamış bir hesap seçin
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bilgi:</strong> Kod otomatik olarak oluşturulacak ve seçilen hesaba bağlanacaktır. <strong>Kodlar sınırsız süre geçerlidir!</strong>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Geri Dön
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-magic me-2"></i>Kod Oluştur
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h5>Kullanılabilir Hesap Yok</h5>
+                        <p class="text-muted">Kod oluşturmak için önce kullanılmamış bir hesap eklemeniz gerekiyor.</p>
+                        <a href="{{ url_for('add_account') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Hesap Ekle
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if accounts %}
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-list me-2"></i>Kullanılabilir Hesaplar
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kullanıcı Adı</th>
+                                    <th>Platform</th>
+                                    <th>Oyun</th>
+                                    <th>Durum</th>
+                                    <th>Oluşturulma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in accounts %}
+                                <tr>
+                                    <td>{{ account.id }}</td>
+                                    <td>{{ account.username }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ account.platform|title }}</span>
+                                    </td>
+                                    <td>{{ account.game }}</td>
+                                    <td>
+                                        {% if account.is_used %}
+                                            <span class="badge bg-success">Kullanıldı</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Bekliyor</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ account.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb me-2"></i>Kod Oluşturma İpuçları
+                    </h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Her hesap için sadece bir kod oluşturun
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kod süresini müşteri ihtiyacına göre ayarlayın
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Oluşturulan kodları güvenli bir şekilde müşteriye iletin
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Kodlar tek kullanımlıktır ve süresi dolduktan sonra geçersiz olur
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const accountSelect = document.getElementById('account_id');
+    const expiryInput = document.getElementById('expiry_hours');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!accountSelect.value) {
+                e.preventDefault();
+                alert('Lütfen bir hesap seçin!');
+                accountSelect.focus();
+                return false;
+            }
+            
+            const expiryHours = parseInt(expiryInput.value);
+            if (expiryHours < 1 || expiryHours > 168) {
+                e.preventDefault();
+                alert('Süre 1-168 saat arasında olmalıdır!');
+                expiryInput.focus();
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 
